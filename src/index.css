@@ -1,13 +1,11 @@
 @import "tailwindcss";
+
+/* Custom CSS for the Contact Manager App */
 :root {
-  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
+  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
   line-height: 1.5;
   font-weight: 400;
-
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
-
+  
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
@@ -25,10 +23,9 @@ a:hover {
 
 body {
   margin: 0;
-  display: flex;
-  place-items: center;
   min-width: 320px;
   min-height: 100vh;
+  width: 100%;
 }
 
 h1 {
@@ -43,16 +40,24 @@ button {
   font-size: 1em;
   font-weight: 500;
   font-family: inherit;
-  background-color: #1a1a1a;
   cursor: pointer;
-  transition: border-color 0.25s;
+  transition: all 0.2s ease-in-out;
 }
-button:hover {
-  border-color: #646cff;
+
+button:not([disabled]):hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
+
 button:focus,
 button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.5);
+}
+
+button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 @media (prefers-color-scheme: light) {
@@ -62,8 +67,5 @@ button:focus-visible {
   }
   a:hover {
     color: #747bff;
-  }
-  button {
-    background-color: #f9f9f9;
   }
 }
