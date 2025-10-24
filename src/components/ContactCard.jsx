@@ -1,10 +1,13 @@
 import { useState } from 'react';
 import { Mail, Phone, MapPin, Building, User, Edit, Trash2 } from 'lucide-react';
 import { getInitials } from '../data/mockContacts';
+import DeleteModal from './DeleteModal';
 
 const ContactCard = ({ contact, onEdit, onDelete }) => {
   const [imageError, setImageError] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const handleImageError = () => {
     setImageError(true);
@@ -17,8 +20,26 @@ const ContactCard = ({ contact, onEdit, onDelete }) => {
 
   const handleDelete = (e) => {
     e.stopPropagation();
-    if (window.confirm(`Are you sure you want to delete ${contact.name}?`)) {
+    setShowDeleteModal(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    setIsDeleting(true);
+    try {
+      // Simulate API call delay
+      await new Promise(resolve => setTimeout(resolve, 500));
       onDelete(contact.id);
+      setShowDeleteModal(false);
+    } catch (error) {
+      console.error('Error deleting contact:', error);
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
+  const handleCloseDeleteModal = () => {
+    if (!isDeleting) {
+      setShowDeleteModal(false);
     }
   };
 
@@ -135,6 +156,18 @@ const ContactCard = ({ contact, onEdit, onDelete }) => {
           </div>
         </div>
       </div>
+      
+      {/* Delete Modal */}
+      <DeleteModal
+        isOpen={showDeleteModal}
+        onClose={handleCloseDeleteModal}
+        onConfirm={handleConfirmDelete}
+        title="Delete Contact"
+        message="Are you sure you want to delete this contact?"
+        itemName={contact.name}
+        confirmText="Delete Contact"
+        isLoading={isDeleting}
+      />
     </div>
   );
 };
