@@ -142,10 +142,6 @@ const ContactListItem = ({ contact, onEdit, onDelete }) => {
             <User className="h-3 w-3 mr-1" />
             <span>Added {new Date(contact.dateAdded).toLocaleDateString()}</span>
           </div>
-          <div className="flex items-center space-x-1">
-            <div className="h-2 w-2 rounded-full bg-green-400"></div>
-            <span>Active</span>
-          </div>
         </div>
       </div>
       

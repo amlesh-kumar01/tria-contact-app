@@ -31,9 +31,9 @@ const Header = () => {
             {/* Title and Stats */}
             <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-6 space-y-2 sm:space-y-0">
               <div>
-                <h1 className="text-xl sm:text-2xl font-bold text-gray-900">
+                <div className="text-3xl font-bold text-gray-900">
                   Contact Manager
-                </h1>
+                </div>
                 <p className="text-gray-600 text-sm mt-1">
                   Manage your contacts efficiently
                 </p>
