@@ -25,15 +25,19 @@ const Pagination = () => {
       }
     } else {
       if (currentPage <= 3) {
-        for (let i = 1; i <= 4; i++) {
+        for (let i = 1; i <= Math.min(4, totalPages); i++) {
           pages.push(i);
         }
-        pages.push('...');
-        pages.push(totalPages);
+        if (totalPages > 4) {
+          pages.push('...');
+          pages.push(totalPages);
+        }
       } else if (currentPage >= totalPages - 2) {
         pages.push(1);
-        pages.push('...');
-        for (let i = totalPages - 3; i <= totalPages; i++) {
+        if (totalPages > 4) {
+          pages.push('...');
+        }
+        for (let i = Math.max(totalPages - 3, 1); i <= totalPages; i++) {
           pages.push(i);
         }
       } else {
@@ -51,8 +55,20 @@ const Pagination = () => {
   };
 
   const handlePageClick = (page) => {
-    if (page !== '...' && page !== currentPage) {
+    if (page !== '...' && page !== currentPage && page >= 1 && page <= totalPages) {
       setCurrentPage(page);
+    }
+  };
+
+  const handlePrevious = () => {
+    if (hasPrevPage) {
+      setCurrentPage(currentPage - 1);
+    }
+  };
+
+  const handleNext = () => {
+    if (hasNextPage) {
+      setCurrentPage(currentPage + 1);
     }
   };
 
@@ -103,7 +119,7 @@ const Pagination = () => {
           <div className="flex items-center space-x-1 order-3">
             {/* Previous Button */}
             <button
-              onClick={() => setCurrentPage(currentPage - 1)}
+              onClick={handlePrevious}
               disabled={!hasPrevPage}
               className="relative inline-flex items-center px-3 py-2 rounded-md text-sm font-medium text-gray-500 bg-white border border-gray-300 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
             >
@@ -138,7 +154,7 @@ const Pagination = () => {
 
             {/* Next Button */}
             <button
-              onClick={() => setCurrentPage(currentPage + 1)}
+              onClick={handleNext}
               disabled={!hasNextPage}
               className="relative inline-flex items-center px-3 py-2 rounded-md text-sm font-medium text-gray-500 bg-white border border-gray-300 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
             >

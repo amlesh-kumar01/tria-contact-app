@@ -23,8 +23,7 @@ const initialState = {
   currentPage: 1,
   itemsPerPage: 6,
   loading: false,
-  error: null,
-  totalContacts: 0
+  error: null
 };
 
 // Reducer function
@@ -35,7 +34,6 @@ const contactReducer = (state, action) => {
         ...state,
         contacts: action.payload,
         filteredContacts: action.payload,
-        totalContacts: action.payload.length,
         loading: false
       };
 
@@ -43,15 +41,16 @@ const contactReducer = (state, action) => {
       const newContacts = [...state.contacts, action.payload];
       const newFilteredContacts = state.searchQuery 
         ? newContacts.filter(contact => 
-            contact.name.toLowerCase().includes(state.searchQuery.toLowerCase())
+            contact.name.toLowerCase().includes(state.searchQuery.toLowerCase()) ||
+            contact.email.toLowerCase().includes(state.searchQuery.toLowerCase()) ||
+            (contact.company && contact.company.toLowerCase().includes(state.searchQuery.toLowerCase()))
           )
         : newContacts;
       
       return {
         ...state,
         contacts: newContacts,
-        filteredContacts: newFilteredContacts,
-        totalContacts: newFilteredContacts.length
+        filteredContacts: newFilteredContacts
       };
 
     case CONTACT_ACTIONS.UPDATE_CONTACT:
@@ -60,32 +59,36 @@ const contactReducer = (state, action) => {
       );
       const updatedFilteredContacts = state.searchQuery 
         ? updatedContacts.filter(contact => 
-            contact.name.toLowerCase().includes(state.searchQuery.toLowerCase())
+            contact.name.toLowerCase().includes(state.searchQuery.toLowerCase()) ||
+            contact.email.toLowerCase().includes(state.searchQuery.toLowerCase()) ||
+            (contact.company && contact.company.toLowerCase().includes(state.searchQuery.toLowerCase()))
           )
         : updatedContacts;
       
       return {
         ...state,
         contacts: updatedContacts,
-        filteredContacts: updatedFilteredContacts,
-        totalContacts: updatedFilteredContacts.length
+        filteredContacts: updatedFilteredContacts
       };
 
     case CONTACT_ACTIONS.DELETE_CONTACT:
       const remainingContacts = state.contacts.filter(contact => contact.id !== action.payload);
       const remainingFilteredContacts = state.searchQuery 
         ? remainingContacts.filter(contact => 
-            contact.name.toLowerCase().includes(state.searchQuery.toLowerCase())
+            contact.name.toLowerCase().includes(state.searchQuery.toLowerCase()) ||
+            contact.email.toLowerCase().includes(state.searchQuery.toLowerCase()) ||
+            (contact.company && contact.company.toLowerCase().includes(state.searchQuery.toLowerCase()))
           )
         : remainingContacts;
+      
+      const newTotalPages = Math.ceil(remainingFilteredContacts.length / state.itemsPerPage);
       
       return {
         ...state,
         contacts: remainingContacts,
         filteredContacts: remainingFilteredContacts,
-        totalContacts: remainingFilteredContacts.length,
-        currentPage: state.currentPage > Math.ceil(remainingFilteredContacts.length / state.itemsPerPage) 
-          ? Math.max(1, Math.ceil(remainingFilteredContacts.length / state.itemsPerPage))
+        currentPage: state.currentPage > newTotalPages 
+          ? Math.max(1, newTotalPages)
           : state.currentPage
       };
 
@@ -94,7 +97,7 @@ const contactReducer = (state, action) => {
         ? state.contacts.filter(contact =>
             contact.name.toLowerCase().includes(action.payload.toLowerCase()) ||
             contact.email.toLowerCase().includes(action.payload.toLowerCase()) ||
-            contact.company.toLowerCase().includes(action.payload.toLowerCase())
+            (contact.company && contact.company.toLowerCase().includes(action.payload.toLowerCase()))
           )
         : state.contacts;
       
@@ -102,7 +105,6 @@ const contactReducer = (state, action) => {
         ...state,
         searchQuery: action.payload,
         filteredContacts: filtered,
-        totalContacts: filtered.length,
         currentPage: 1 // Reset to first page when searching
       };
 
@@ -169,15 +171,8 @@ export const ContactProvider = ({ children }) => {
     }, 500);
   }, []);
 
-  // Memoized values and functions
-  const value = useMemo(() => {
-    // Calculate pagination
-    const startIndex = (state.currentPage - 1) * state.itemsPerPage;
-    const endIndex = startIndex + state.itemsPerPage;
-    const paginatedContacts = state.filteredContacts.slice(startIndex, endIndex);
-    const totalPages = Math.ceil(state.totalContacts / state.itemsPerPage);
-
-    // Actions
+  // Memoize actions to prevent infinite loops
+  const actions = useMemo(() => {
     const addContact = (contactData) => {
       const newContact = {
         ...contactData,
@@ -212,6 +207,30 @@ export const ContactProvider = ({ children }) => {
     };
 
     return {
+      addContact,
+      updateContact,
+      deleteContact,
+      setSearchQuery,
+      setCurrentPage,
+      setItemsPerPage,
+      clearError
+    };
+  }, [state.contacts]);
+
+  // Memoized values and functions
+  const value = useMemo(() => {
+    // Calculate pagination
+    const totalFilteredContacts = state.filteredContacts.length;
+    const totalPages = Math.ceil(totalFilteredContacts / state.itemsPerPage);
+    
+    // Ensure currentPage is within valid range for calculations
+    const currentPageForCalc = totalPages > 0 ? Math.min(Math.max(1, state.currentPage), totalPages) : 1;
+    
+    const startIndex = (currentPageForCalc - 1) * state.itemsPerPage;
+    const endIndex = startIndex + state.itemsPerPage;
+    const paginatedContacts = state.filteredContacts.slice(startIndex, endIndex);
+
+    return {
       // State
       contacts: state.contacts,
       filteredContacts: state.filteredContacts,
@@ -219,25 +238,19 @@ export const ContactProvider = ({ children }) => {
       searchQuery: state.searchQuery,
       currentPage: state.currentPage,
       itemsPerPage: state.itemsPerPage,
-      totalContacts: state.totalContacts,
+      totalContacts: totalFilteredContacts,
       totalPages,
       loading: state.loading,
       error: state.error,
       
       // Actions
-      addContact,
-      updateContact,
-      deleteContact,
-      setSearchQuery,
-      setCurrentPage,
-      setItemsPerPage,
-      clearError,
+      ...actions,
       
       // Pagination helpers
       hasNextPage: state.currentPage < totalPages,
       hasPrevPage: state.currentPage > 1,
-      startIndex: startIndex + 1,
-      endIndex: Math.min(endIndex, state.totalContacts)
+      startIndex: totalFilteredContacts > 0 ? startIndex + 1 : 0,
+      endIndex: Math.min(endIndex, totalFilteredContacts)
     };
   }, [state]);
 

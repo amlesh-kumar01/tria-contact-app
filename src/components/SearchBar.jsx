@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Search, X } from 'lucide-react';
 import { useContacts } from '../context/ContactContext';
-import { useDebounce } from '../hooks/useDebounce';
+import { useDebounce } from '../hooks/useCustom';
 
 const SearchBar = () => {
   const { searchQuery, setSearchQuery, totalContacts, filteredContacts } = useContacts();
