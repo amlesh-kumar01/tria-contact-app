@@ -42,7 +42,7 @@ const ContactCard = ({ contact, onEdit, onDelete }) => {
                   onError={handleImageError}
                 />
               ) : (
-                <div className="h-16 w-16 rounded-full bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center text-white font-semibold text-lg ring-2 ring-blue-100">
+                <div className="h-16 w-16 rounded-full bg-linear-to-br from-blue-400 to-purple-500 flex items-center justify-center text-white font-semibold text-lg ring-2 ring-blue-100">
                   {getInitials(contact.name)}
                 </div>
               )}
