@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { UserPlus, Users, Grid, List } from 'lucide-react';
 import SearchBar from './SearchBar';
 import ContactModal from './ContactModal';
+import SortDropdown from './SortDropdown';
 import { useContacts } from '../context/ContactContext';
 
 const Header = () => {
@@ -59,8 +60,11 @@ const Header = () => {
                 <SearchBar />
               </div>
 
-              {/* View Toggle and Add Button */}
+              {/* Sort, View Toggle and Add Button */}
               <div className="flex items-center space-x-2">
+                
+                {/* Sort Dropdown */}
+                <SortDropdown />
                 
                 {/* View Mode Toggle */}
                 <div className="hidden sm:flex bg-gray-100 rounded-lg p-1">

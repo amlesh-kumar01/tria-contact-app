@@ -11,6 +11,8 @@ const CONTACT_ACTIONS = {
   SET_CURRENT_PAGE: 'SET_CURRENT_PAGE',
   SET_ITEMS_PER_PAGE: 'SET_ITEMS_PER_PAGE',
   SET_VIEW_MODE: 'SET_VIEW_MODE',
+  SET_SORT_BY: 'SET_SORT_BY',
+  SET_SORT_ORDER: 'SET_SORT_ORDER',
   SET_LOADING: 'SET_LOADING',
   SET_ERROR: 'SET_ERROR',
   CLEAR_ERROR: 'CLEAR_ERROR'
@@ -24,6 +26,8 @@ const initialState = {
   currentPage: 1,
   itemsPerPage: 6,
   viewMode: 'grid', // 'grid' or 'list'
+  sortBy: 'name', // 'name', 'email', 'company', 'dateAdded'
+  sortOrder: 'asc', // 'asc' or 'desc'
   loading: false,
   error: null
 };
@@ -129,6 +133,18 @@ const contactReducer = (state, action) => {
         viewMode: action.payload
       };
 
+    case CONTACT_ACTIONS.SET_SORT_BY:
+      return {
+        ...state,
+        sortBy: action.payload
+      };
+
+    case CONTACT_ACTIONS.SET_SORT_ORDER:
+      return {
+        ...state,
+        sortOrder: action.payload
+      };
+
     case CONTACT_ACTIONS.SET_LOADING:
       return {
         ...state,
@@ -214,6 +230,14 @@ export const ContactProvider = ({ children }) => {
       dispatch({ type: CONTACT_ACTIONS.SET_VIEW_MODE, payload: mode });
     };
 
+    const setSortBy = (sortBy) => {
+      dispatch({ type: CONTACT_ACTIONS.SET_SORT_BY, payload: sortBy });
+    };
+
+    const setSortOrder = (sortOrder) => {
+      dispatch({ type: CONTACT_ACTIONS.SET_SORT_ORDER, payload: sortOrder });
+    };
+
     const clearError = () => {
       dispatch({ type: CONTACT_ACTIONS.CLEAR_ERROR });
     };
@@ -226,14 +250,49 @@ export const ContactProvider = ({ children }) => {
       setCurrentPage,
       setItemsPerPage,
       setViewMode,
+      setSortBy,
+      setSortOrder,
       clearError
     };
   }, [state.contacts]);
 
   // Memoized values and functions
   const value = useMemo(() => {
+    // Sort the filtered contacts
+    const sortedContacts = [...state.filteredContacts].sort((a, b) => {
+      let aValue, bValue;
+      
+      switch (state.sortBy) {
+        case 'name':
+          aValue = a.name.toLowerCase();
+          bValue = b.name.toLowerCase();
+          break;
+        case 'email':
+          aValue = a.email.toLowerCase();
+          bValue = b.email.toLowerCase();
+          break;
+        case 'company':
+          aValue = (a.company || '').toLowerCase();
+          bValue = (b.company || '').toLowerCase();
+          break;
+        case 'dateAdded':
+          aValue = new Date(a.dateAdded);
+          bValue = new Date(b.dateAdded);
+          break;
+        default:
+          aValue = a.name.toLowerCase();
+          bValue = b.name.toLowerCase();
+      }
+      
+      if (state.sortOrder === 'desc') {
+        return aValue < bValue ? 1 : aValue > bValue ? -1 : 0;
+      } else {
+        return aValue > bValue ? 1 : aValue < bValue ? -1 : 0;
+      }
+    });
+
     // Calculate pagination
-    const totalFilteredContacts = state.filteredContacts.length;
+    const totalFilteredContacts = sortedContacts.length;
     const totalPages = Math.ceil(totalFilteredContacts / state.itemsPerPage);
     
     // Ensure currentPage is within valid range for calculations
@@ -241,7 +300,7 @@ export const ContactProvider = ({ children }) => {
     
     const startIndex = (currentPageForCalc - 1) * state.itemsPerPage;
     const endIndex = startIndex + state.itemsPerPage;
-    const paginatedContacts = state.filteredContacts.slice(startIndex, endIndex);
+    const paginatedContacts = sortedContacts.slice(startIndex, endIndex);
 
     return {
       // State
@@ -252,6 +311,8 @@ export const ContactProvider = ({ children }) => {
       currentPage: state.currentPage,
       itemsPerPage: state.itemsPerPage,
       viewMode: state.viewMode,
+      sortBy: state.sortBy,
+      sortOrder: state.sortOrder,
       totalContacts: totalFilteredContacts,
       totalPages,
       loading: state.loading,
