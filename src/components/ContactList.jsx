@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useContacts } from '../context/ContactContext';
 import ContactCard from './ContactCard';
+import ContactListItem from './ContactListItem';
 import LoadingSpinner from './LoadingSpinner';
 import ContactModal from './ContactModal';
 import { Users, UserPlus } from 'lucide-react';
@@ -12,6 +13,7 @@ const ContactList = () => {
     error, 
     filteredContacts,
     searchQuery,
+    viewMode,
     deleteContact,
     updateContact
   } = useContacts();
@@ -96,16 +98,29 @@ const ContactList = () => {
 
   return (
     <>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {paginatedContacts.map((contact) => (
-          <ContactCard
-            key={contact.id}
-            contact={contact}
-            onEdit={handleEdit}
-            onDelete={deleteContact}
-          />
-        ))}
-      </div>
+      {viewMode === 'grid' ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {paginatedContacts.map((contact) => (
+            <ContactCard
+              key={contact.id}
+              contact={contact}
+              onEdit={handleEdit}
+              onDelete={deleteContact}
+            />
+          ))}
+        </div>
+      ) : (
+        <div className="space-y-4">
+          {paginatedContacts.map((contact) => (
+            <ContactListItem
+              key={contact.id}
+              contact={contact}
+              onEdit={handleEdit}
+              onDelete={deleteContact}
+            />
+          ))}
+        </div>
+      )}
 
       {/* Contact Modal */}
       {isModalOpen && (

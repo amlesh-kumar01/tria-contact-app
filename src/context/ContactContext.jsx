@@ -10,6 +10,7 @@ const CONTACT_ACTIONS = {
   SET_SEARCH_QUERY: 'SET_SEARCH_QUERY',
   SET_CURRENT_PAGE: 'SET_CURRENT_PAGE',
   SET_ITEMS_PER_PAGE: 'SET_ITEMS_PER_PAGE',
+  SET_VIEW_MODE: 'SET_VIEW_MODE',
   SET_LOADING: 'SET_LOADING',
   SET_ERROR: 'SET_ERROR',
   CLEAR_ERROR: 'CLEAR_ERROR'
@@ -22,6 +23,7 @@ const initialState = {
   searchQuery: '',
   currentPage: 1,
   itemsPerPage: 6,
+  viewMode: 'grid', // 'grid' or 'list'
   loading: false,
   error: null
 };
@@ -121,6 +123,12 @@ const contactReducer = (state, action) => {
         currentPage: 1 // Reset to first page when changing items per page
       };
 
+    case CONTACT_ACTIONS.SET_VIEW_MODE:
+      return {
+        ...state,
+        viewMode: action.payload
+      };
+
     case CONTACT_ACTIONS.SET_LOADING:
       return {
         ...state,
@@ -202,6 +210,10 @@ export const ContactProvider = ({ children }) => {
       dispatch({ type: CONTACT_ACTIONS.SET_ITEMS_PER_PAGE, payload: items });
     };
 
+    const setViewMode = (mode) => {
+      dispatch({ type: CONTACT_ACTIONS.SET_VIEW_MODE, payload: mode });
+    };
+
     const clearError = () => {
       dispatch({ type: CONTACT_ACTIONS.CLEAR_ERROR });
     };
@@ -213,6 +225,7 @@ export const ContactProvider = ({ children }) => {
       setSearchQuery,
       setCurrentPage,
       setItemsPerPage,
+      setViewMode,
       clearError
     };
   }, [state.contacts]);
@@ -238,6 +251,7 @@ export const ContactProvider = ({ children }) => {
       searchQuery: state.searchQuery,
       currentPage: state.currentPage,
       itemsPerPage: state.itemsPerPage,
+      viewMode: state.viewMode,
       totalContacts: totalFilteredContacts,
       totalPages,
       loading: state.loading,

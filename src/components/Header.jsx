@@ -5,9 +5,8 @@ import ContactModal from './ContactModal';
 import { useContacts } from '../context/ContactContext';
 
 const Header = () => {
-  const { totalContacts, filteredContacts, addContact } = useContacts();
+  const { totalContacts, filteredContacts, addContact, viewMode, setViewMode } = useContacts();
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [viewMode, setViewMode] = useState('grid'); // grid or list
 
   const handleAddContact = () => {
     setIsModalOpen(true);
